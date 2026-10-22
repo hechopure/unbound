@@ -1,27 +1,26 @@
 # Unbound DNS - Personal Config
 
-
 [![Docker Pulls](https://img.shields.io/docker/pulls/hechopure/unbound)](https://hub.docker.com/r/hechopure/unbound)
 
 
-Resolver DNS de reenvío (forwarder) hacia Quad9 mediante DNS-over-TLS.
-Diseñado para colocarse detrás de Pi-hole.
+DNS forwarding resolver pointing to Quad9 over DNS-over-TLS.
+Designed to sit behind Pi-hole.
 
-**Código fuente y documentación completa:**
+**Source code and full documentation:**
 https://github.com/hechopure/unbound
 
-## Arquitectura
+## Architecture
 
-    Clientes LAN
+    LAN Clients
          |
          v
-    Pi-hole (dnsmasq)          <- bloqueo de anuncios, DNS local, query log
+    Pi-hole (dnsmasq)          <- ad blocking, local DNS, query log
          |
          v
-    Unbound (este contenedor)  <- caché, DoT, filtrado de direcciones privadas
+    Unbound (this container)   <- cache, DoT, private address filtering
          |
          v  DNS-over-TLS :853
-    Quad9 (9.9.9.9)            <- validación DNSSEC, bloqueo de malware
+    Quad9 (9.9.9.9)            <- DNSSEC validation, malware blocking
 
 ## Quick Start
 
@@ -34,46 +33,48 @@ https://github.com/hechopure/unbound
       -p 5353:5353/tcp -p 5353:5353/udp \
       hechopure/unbound:latest
 
-## Con Pi-hole
+## With Pi-hole
 
-1. Correr este contenedor
-2. Pi-hole → Settings → DNS → Custom DNS servers
-3. Agregar: `IP_DE_UNBOUND#5353`
-4. Desmarcar cualquier upstream público que esté seleccionado
-5. **Desmarcar "Use DNSSEC"** en la sección DNSSEC
+1. Run this container
+2. Pi-hole -> Settings -> DNS -> Custom DNS servers
+3. Add: `UNBOUND_IP#5353`
+4. Untick any public upstream that may be selected
+5. **Untick "Use DNSSEC"** in the DNSSEC section
 
-El punto 5 es importante: la validación la hace Quad9, y el tramo
-unbound-Quad9 va cifrado con DoT. Activar la validación en Pi-hole
-agrega un segundo validador que puede discrepar del primero y producir
-SERVFAIL esporádicos.
+Step 5 matters: validation is performed by Quad9, and the
+unbound-to-Quad9 hop is encrypted with DoT. Enabling validation in
+Pi-hole adds a second independent validator that can disagree with the
+first, producing sporadic SERVFAIL on domains that should resolve fine.
 
-## Notas sobre la configuración
+## Configuration notes
 
-- **Puerto 5353**, no 53. Permite correr como usuario sin privilegios.
-- **`access-control` cerrado.** Solo se permite consultar desde `127.0.0.0/8`,
-  `172.16.0.0/12` (bridges de Docker) y `192.168.200.0/24`. Todo lo demás
-  recibe REFUSED. **Adaptá las subredes a tu red antes de usar.**
-- **`private-address`** filtra respuestas que apunten a rangos RFC1918
-  (protección contra DNS rebinding). No afecta a los registros locales
-  de Pi-hole, que los responde dnsmasq.
-- **`log-queries: yes`** registra cada consulta. Redundante con Pi-hole;
-  se puede desactivar.
-- **Sin validación DNSSEC local.** Delegada en Quad9.
+- **Port 5353**, not 53. This allows running as an unprivileged user.
+- **`access-control` is closed.** Queries are only accepted from
+  `127.0.0.0/8`, `172.16.0.0/12` (Docker bridges) and `192.168.200.0/24`.
+  Everything else gets REFUSED. **Adjust the subnets to match your
+  network before use.**
+- **`private-address`** filters responses pointing to RFC1918 ranges
+  (DNS rebinding protection). It does not affect Pi-hole's local records,
+  which are answered by dnsmasq.
+- **`log-queries: yes`** logs every query. Redundant with Pi-hole;
+  can be disabled.
+- **No local DNSSEC validation.** Delegated to Quad9.
 
-## Aviso importante
+## Important notice
 
-Esta imagen **no es un open resolver**. La configuración usa
-`access-control: 0.0.0.0/0 refuse` como regla final, por lo que rechaza
-consultas de cualquier origen no listado explícitamente.
+This image is **not an open resolver**. The configuration ends with
+`access-control: 0.0.0.0/0 refuse`, so queries from any origin not
+explicitly listed are rejected.
 
-Antes de usarla, editá `unbound.conf` y ajustá `access-control` a tu
-subred real. Si tu LAN no es `192.168.200.0/24`, esa regla no te sirve.
+Before using it, edit `unbound.conf` and adjust `access-control` to your
+actual subnet. If your LAN is not `192.168.200.0/24`, that rule will not
+work for you.
 
-Si necesitás exponer el resolver fuera de tu LAN, no lo hagas agregando
-`0.0.0.0/0 allow` — eso convierte el contenedor en un amplificador DDoS.
-Usá reglas específicas por subred.
+If you need to expose the resolver beyond your LAN, do not do it by
+adding `0.0.0.0/0 allow` — that turns the container into a DDoS
+amplifier. Use specific per-subnet rules instead.
 
-## Actualización
+## Updating
 
     docker pull hechopure/unbound:latest
     docker rm -f unbound
@@ -86,6 +87,6 @@ Usá reglas específicas por subred.
       -p 5353:5353/tcp -p 5353:5353/udp \
       hechopure/unbound:latest
 
-Reconstruir mensualmente para incorporar parches de seguridad de Debian.
-El Dockerfile no ejecuta `apt-get upgrade`.
+Rebuild monthly to pick up Debian security patches. The Dockerfile does
+not run `apt-get upgrade`.
 
