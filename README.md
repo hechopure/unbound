@@ -6,8 +6,7 @@
 DNS forwarding resolver pointing to Quad9 over DNS-over-TLS.
 Designed to sit behind Pi-hole.
 
-**Source code and full documentation:**
-https://github.com/hechopure/unbound
+
 
 ## Architecture
 
