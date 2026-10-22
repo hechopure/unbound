@@ -1,7 +1,6 @@
 services:
   unbound:
     image: hechopure/unbound:latest
-#   build: .
     container_name: unbound
     user: "1000:1000"
     read_only: true
@@ -15,8 +14,8 @@ services:
     security_opt:
       - no-new-privileges:true
     ports:
-      - "192.168.200.201:5353:5353/tcp"
-      - "192.168.200.201:5353:5353/udp"
+      - "5353:5353/tcp"
+      - "5353:5353/udp"
     volumes:
       - unbound-data:/var/lib/unbound:rw
     restart: unless-stopped
