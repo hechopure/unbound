@@ -1,8 +1,8 @@
 # Unbound DNS - Personal Config
 
-[![GitHub](https://img.shields.io/badge/GitHub-hechopure%2Funbound-blue?logo=github)](https://github.com/hechopure/unbound)
+
 [![Docker Pulls](https://img.shields.io/docker/pulls/hechopure/unbound)](https://hub.docker.com/r/hechopure/unbound)
-[![License](https://img.shields.io/github/license/hechopure/unbound)](https://github.com/hechopure/unbound/blob/main/LICENSE)
+
 
 Resolver DNS de reenvío (forwarder) hacia Quad9 mediante DNS-over-TLS.
 Diseñado para colocarse detrás de Pi-hole.
