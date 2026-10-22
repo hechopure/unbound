@@ -1,7 +1,5 @@
 # Unbound DNS - Personal Config
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/hechopure/unbound)](https://hub.docker.com/r/hechopure/unbound)
-
 
 DNS forwarding resolver pointing to Quad9 over DNS-over-TLS.
 Designed to sit behind Pi-hole.
